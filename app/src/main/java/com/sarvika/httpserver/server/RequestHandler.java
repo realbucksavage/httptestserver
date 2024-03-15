@@ -2,6 +2,8 @@ package com.sarvika.httpserver.server;
 
 import com.sarvika.httpserver.api.HttpRequest;
 import org.apache.commons.io.IOUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -12,6 +14,7 @@ import java.nio.charset.Charset;
 import java.nio.file.Files;
 
 public class RequestHandler extends Thread {
+    private static final Logger LOGGER = LoggerFactory.getLogger(RequestHandler.class);
 
     private Socket clientSocket;
     private String resourceBaseLocation;
@@ -20,18 +23,19 @@ public class RequestHandler extends Thread {
         this.clientSocket = clientSocket;
         this.resourceBaseLocation = resourceBaseLocation;
 
-        System.out.println("client connected from " + clientSocket.getInetAddress().getHostAddress());
+        LOGGER.trace("client connected from " + clientSocket.getInetAddress().getHostAddress());
     }
 
     @Override
     public void run() {
-        System.out.println("serving request...");
+        LOGGER.trace("serving client {}", clientSocket.getRemoteSocketAddress().toString());
+
         try {
             HttpRequest request = new DefaultHttpRequest(this.clientSocket);
             this.serveRequest(request);
             this.clientSocket.close();
         } catch (IOException e) {
-            e.printStackTrace();
+            LOGGER.trace("cannot serve client", e);
         }
     }
 
